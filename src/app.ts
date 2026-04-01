@@ -2,9 +2,10 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
-import authRoutes from './routes/authRoutes';
-import transactionRoutes from './routes/transactionRoutes';
-import dashboardRoutes from './routes/dashboardRoutes';
+import authRoutes from './features/auth/routes/authRoutes';
+import transactionRoutes from "./routes/transactionRoutes";
+import dashboardRoutes from "./routes/dashboardRoutes";
+import { errorHandler } from "./middleware/errorHandler";
 
 dotenv.config();
 
@@ -21,11 +22,15 @@ app.get("/api/health", (req: Request, res: Response) => {
   });
 });
 
-app.use('/api/auth', authRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/transactions", transactionRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
-app.use('/api/transactions', transactionRoutes);
+app.use((req, res) => {
+  res.status(404).json({ error: `Route ${req.originalUrl} not found` });
+});
 
-app.use('/api/dashboard', dashboardRoutes);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
