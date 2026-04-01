@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import authRoutes from './features/auth/routes/authRoutes';
-import transactionRoutes from "./routes/transactionRoutes";
+import transactionRoutes from './features/transactions/routes/transactionRoutes';
 import dashboardRoutes from "./routes/dashboardRoutes";
 import { errorHandler } from "./middleware/errorHandler";
 
