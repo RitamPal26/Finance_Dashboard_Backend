@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import authRoutes from './routes/authRoutes';
+import { authenticateJWT } from './middleware/authMiddleware';
+import { roleGuard } from './middleware/roleGuard';
 
 dotenv.config();
 
@@ -20,6 +22,10 @@ app.get("/api/health", (req: Request, res: Response) => {
 });
 
 app.use('/api/auth', authRoutes);
+
+app.get('/api/test-admin', authenticateJWT, roleGuard(['ADMIN']), (req, res) => {
+  res.status(200).json({ message: 'Success! You have passed the bouncers as an ADMIN.' });
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
