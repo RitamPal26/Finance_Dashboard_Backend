@@ -4,7 +4,7 @@ import prisma from "../../../config/db";
 
 export class AuthService {
   private static generateToken(id: string, role: string): string {
-    return jwt.sign({ id, role }, process.env.JWT_SECRET as string, {
+    return jwt.sign({ id, role }, env.JWT_SECRET as string, {
       expiresIn: "1d",
     });
   }

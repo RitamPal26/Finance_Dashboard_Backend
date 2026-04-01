@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 import authRoutes from './features/auth/routes/authRoutes';
 import transactionRoutes from './features/transactions/routes/transactionRoutes';
-import dashboardRoutes from "./routes/dashboardRoutes";
+import dashboardRoutes from './features/dashboard/routes/dashboardRoutes';
 import { errorHandler } from "./middleware/errorHandler";
 
 dotenv.config();
