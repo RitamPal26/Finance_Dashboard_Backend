@@ -1,5 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
+import { env } from "../../../config/env";
 import prisma from "../../../config/db";
 
 export class AuthService {
