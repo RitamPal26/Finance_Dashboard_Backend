@@ -1,7 +1,7 @@
-import prisma from "../../../config/db";
+import prisma from '../../../config/db';
 
 export class TransactionService {
-  static async createTransaction(userId: string, data: any) {
+  static async createTransaction(userId: string, data: Record<string, unknown>) {
     return await prisma.transaction.create({
       data: {
         ...data,
@@ -14,7 +14,7 @@ export class TransactionService {
   static async getTransactionsByUserId(userId: string) {
     return await prisma.transaction.findMany({
       where: { userId },
-      orderBy: { date: "desc" },
+      orderBy: { date: 'desc' },
     });
   }
 }
