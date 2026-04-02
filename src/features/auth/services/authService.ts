@@ -4,6 +4,19 @@ import jwt from 'jsonwebtoken';
 import { env } from '../../../config/env';
 import prisma from '../../../config/db';
 
+import { Role } from '@prisma/client';
+
+export interface RegisterInput {
+  email: string;
+  password: string;
+  role?: Role;
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
 export class AuthService {
   private static generateToken(id: string, role: string): string {
     return jwt.sign({ id, role }, env.JWT_SECRET as string, {
@@ -11,7 +24,7 @@ export class AuthService {
     });
   }
 
-  static async registerUser(data: Record<string, unknown>) {
+  static async registerUser(data: RegisterInput) {
     const { email, password, role } = data;
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -21,14 +34,18 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(password, salt);
 
     const user = await prisma.user.create({
-      data: { email, passwordHash, role: role || 'VIEWER' },
+      data: {
+        email,
+        passwordHash,
+        role: role || 'VIEWER',
+      },
     });
 
     const token = this.generateToken(user.id, user.role);
     return { token, user: { id: user.id, email: user.email, role: user.role } };
   }
 
-  static async loginUser(data: any) {
+  static async loginUser(data: LoginInput) {
     const { email, password } = data;
 
     const user = await prisma.user.findUnique({ where: { email } });

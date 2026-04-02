@@ -1,4 +1,6 @@
 import { Response } from 'express';
+import { z } from 'zod';
+
 import { AuthRequest } from '../../../middleware/authMiddleware';
 import { TransactionService } from '../services/transactionService';
 import { transactionSchema } from '../schemas/transactionSchema';
@@ -11,10 +13,11 @@ export class TransactionController {
 
       res.status(201).json(transaction);
     } catch (error: unknown) {
-      if (error.errors) {
-        res.status(400).json({ error: error.errors });
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: error.issues });
       } else {
-        res.status(500).json({ error: 'Server error creating transaction' });
+        const message = error instanceof Error ? error.message : 'Server error';
+        res.status(500).json({ error: message });
       }
     }
   }
