@@ -15,7 +15,16 @@ import { errorHandler } from './middleware/errorHandler';
 
 const app: Application = express();
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: 'Too many requests, please try again later.' },
+});
+
+const swaggerDocument = YAML.load(path.join(__dirname, '../swagger.yaml'));
+
 const allowedOrigins = env.ALLOWED_ORIGINS.split(',');
+
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -27,35 +36,22 @@ app.use(
     },
   }),
 );
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { error: 'Too many requests, please try again later.' },
-});
-
-const swaggerDocument = YAML.load(path.join(__dirname, '../swagger.yaml'));
-
 app.use(helmet());
-app.use('/api', limiter);
 app.use(express.json());
+app.use(errorHandler);
+app.use('/api', limiter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-
-app.use((req, res) => {
-  res.status(404).json({ error: `Route ${req.originalUrl} not found` });
-});
-
-app.use(errorHandler);
-
 app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({
     status: 'success',
     message: 'Finance Dashboard API is running gracefully.',
   });
+});
+app.use((req, res) => {
+  res.status(404).json({ error: `Route ${req.originalUrl} not found` });
 });
 
 export default app;
