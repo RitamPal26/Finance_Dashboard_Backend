@@ -22,7 +22,7 @@ paths:
         '201':
           description: User registered successfully
         '400':
-          description: User already exists
+          description: Validation error or User already exists
 
   /api/auth/login:
     post:
@@ -47,7 +47,93 @@ paths:
         '401':
           description: Invalid credentials
 
+  /api/health:
+    get:
+      summary: Check API Health
+      tags: [System]
+      responses:
+        '200':
+          description: API is running smoothly
+
+  /api/transactions:
+    get:
+      summary: Get all transactions
+      tags: [Transactions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [INCOME, EXPENSE]
+          description: Filter by transaction type
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filter by category
+      responses:
+        '200':
+          description: A list of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+        '401':
+          description: Unauthorized
+    post:
+      summary: Create a new transaction
+      tags: [Transactions]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionInput'
+      responses:
+        '201':
+          description: Transaction created successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (e.g., Viewer role attempting to create)
+
+  /api/dashboard/summary:
+    get:
+      summary: Get dashboard totals and net balance
+      tags: [Dashboard]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalIncome:
+                    type: number
+                  totalExpense:
+                    type: number
+                  netBalance:
+                    type: number
+        '401':
+          description: Unauthorized
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     RegisterInput:
       type: object
@@ -61,7 +147,7 @@ components:
           format: password
         role:
           type: string
-          enum: [ADMIN, VIEWER]
+          enum: [VIEWER, ANALYST, ADMIN]
           default: VIEWER
 
     LoginInput:
@@ -74,3 +160,39 @@ components:
         password:
           type: string
           format: password
+
+    TransactionInput:
+      type: object
+      required: [amount, type, category]
+      properties:
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [INCOME, EXPENSE]
+        category:
+          type: string
+        date:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          nullable: true
+
+    Transaction:
+      allOf:
+        - $ref: '#/components/schemas/TransactionInput'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            userId:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
