@@ -12,6 +12,7 @@ import authRoutes from './features/auth/routes/authRoutes';
 import transactionRoutes from './features/transactions/routes/transactionRoutes';
 import dashboardRoutes from './features/dashboard/routes/dashboardRoutes';
 import { errorHandler } from './middleware/errorHandler';
+import userRoutes from './features/users/routes/userRoutes';
 
 const app: Application = express();
 
@@ -42,6 +43,7 @@ app.use(errorHandler);
 app.use('/api', limiter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.get('/api/health', (req: Request, res: Response) => {

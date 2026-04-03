@@ -47,6 +47,89 @@ paths:
         '401':
           description: Invalid credentials
 
+  /api/users:
+    get:
+      summary: Get all users (Admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Requires Admin role
+
+  /api/users/{id}:
+    get:
+      summary: Get user by ID (Admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+    patch:
+      summary: Update user role or status (Admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateInput'
+      responses:
+        '200':
+          description: User updated successfully
+        '400':
+          description: Validation error
+
+    delete:
+      summary: Deactivate a user (Soft Delete - Admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User deactivated successfully
+
   /api/health:
     get:
       summary: Check API Health
@@ -196,3 +279,29 @@ components:
             updatedAt:
               type: string
               format: date-time
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [VIEWER, ANALYST, ADMIN]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    UserUpdateInput:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [VIEWER, ANALYST, ADMIN]
+        isActive:
+          type: boolean
