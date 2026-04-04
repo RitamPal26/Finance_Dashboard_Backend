@@ -1,14 +1,17 @@
-import { Response } from 'express';
-import { AuthRequest } from '../../../middleware/authMiddleware';
+import { Request, Response, NextFunction } from 'express';
+
 import { DashboardService } from '../services/dashboardService';
 
 export class DashboardController {
-  static async getSummary(req: AuthRequest, res: Response): Promise<void> {
+  static async getSummary(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = await DashboardService.getSummary(req.user!.id);
-      res.status(200).json(data);
-    } catch {
-      res.status(500).json({ _error: 'Server error generating dashboard summary' });
+      const dashboardData = await DashboardService.getFullDashboard();
+      res.status(200).json({
+        status: 'success',
+        data: dashboardData,
+      });
+    } catch (error) {
+      next(error);
     }
   }
 }
