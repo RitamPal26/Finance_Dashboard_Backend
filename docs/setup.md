@@ -49,6 +49,7 @@ JWT_SECRET=your_super_secret_jwt_key_here_make_it_long
 
 # Database (Example uses PostgreSQL)
 DATABASE_URL="postgresql://user:password@localhost:5432/finance_dashboard?schema=public"
+DIRECT_URL="postgresql://nbehseu:nxxx@esjisen.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 ```
 
 ---
