@@ -21,8 +21,6 @@ describe('API Integration Tests', () => {
       role: 'ADMIN',
     });
 
-    console.log('SERVER ERROR:', res.body);
-
     expect(res.status).toBe(201);
   });
 
