@@ -39,7 +39,6 @@ app.use(
 );
 app.use(helmet());
 app.use(express.json());
-app.use(errorHandler);
 app.use('/api', limiter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/auth', authRoutes);
@@ -55,5 +54,6 @@ app.get('/api/health', (req: Request, res: Response) => {
 app.use((req, res) => {
   res.status(404).json({ error: `Route ${req.originalUrl} not found` });
 });
+app.use(errorHandler);
 
 export default app;
