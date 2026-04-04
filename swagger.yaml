@@ -146,6 +146,18 @@ paths:
         - bearerAuth: []
       parameters:
         - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date-time
+          description: Filter by start date (ISO-8601)
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date-time
+          description: Filter by end date (ISO-8601)
+        - in: query
           name: type
           schema:
             type: string
@@ -187,6 +199,69 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden (e.g., Viewer role attempting to create)
+
+  /api/transactions/{id}:
+    get:
+      summary: Get a transaction by ID
+      tags: [Transactions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transaction details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '404':
+          description: Transaction not found
+    patch:
+      summary: Update a transaction (Admin only)
+      tags: [Transactions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionUpdateInput'
+      responses:
+        '200':
+          description: Transaction updated successfully
+        '404':
+          description: Transaction not found
+    delete:
+      summary: Delete a transaction (Admin only)
+      tags: [Transactions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transaction deleted successfully
+        '404':
+          description: Transaction not found
 
   /api/dashboard/summary:
     get:
@@ -247,6 +322,23 @@ components:
     TransactionInput:
       type: object
       required: [amount, type, category]
+      properties:
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [INCOME, EXPENSE]
+        category:
+          type: string
+        date:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          nullable: true
+
+    TransactionUpdateInput:
+      type: object
       properties:
         amount:
           type: number

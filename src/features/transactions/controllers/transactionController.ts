@@ -1,33 +1,60 @@
-import { Response } from 'express';
-import { z } from 'zod';
+import { Request, Response, NextFunction } from 'express';
 
-import { AuthRequest } from '../../../middleware/authMiddleware';
 import { TransactionService } from '../services/transactionService';
-import { transactionSchema } from '../schemas/transactionSchema';
+import { AuthRequest } from '../../../middleware/authMiddleware';
 
 export class TransactionController {
-  static async create(req: AuthRequest, res: Response): Promise<void> {
+  static async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const validatedData = transactionSchema.parse(req.body);
-      const transaction = await TransactionService.createTransaction(req.user!.id, validatedData);
-
-      res.status(201).json(transaction);
-    } catch (error: unknown) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ error: error.issues });
-      } else {
-        const message = error instanceof Error ? error.message : 'Server error';
-        res.status(500).json({ error: message });
-      }
+      const transaction = await TransactionService.createTransaction(req.user!.id, req.body);
+      res.status(201).json({ status: 'success', transaction });
+    } catch (error) {
+      next(error);
     }
   }
 
-  static async getAll(req: AuthRequest, res: Response): Promise<void> {
+  static async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const transactions = await TransactionService.getTransactionsByUserId(req.user!.id);
+      const transactions = await TransactionService.getAllTransactions(req.query);
       res.status(200).json(transactions);
-    } catch {
-      res.status(500).json({ error: 'Server error fetching transactions' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const transaction = await TransactionService.getTransactionById(req.params.id as string);
+      res.status(200).json(transaction);
+    } catch (error: any) {
+      if (error.message === 'Transaction not found')
+        return res.status(404).json({ error: error.message });
+      next(error);
+    }
+  }
+
+  static async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const updatedTransaction = await TransactionService.updateTransaction(
+        req.params.id as string,
+        req.body,
+      );
+      res.status(200).json({ status: 'success', transaction: updatedTransaction });
+    } catch (error: any) {
+      if (error.message === 'Transaction not found')
+        return res.status(404).json({ error: error.message });
+      next(error);
+    }
+  }
+
+  static async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      await TransactionService.deleteTransaction(req.params.id as string);
+      res.status(200).json({ status: 'success', message: 'Transaction deleted successfully' });
+    } catch (error: any) {
+      if (error.message === 'Transaction not found')
+        return res.status(404).json({ error: error.message });
+      next(error);
     }
   }
 }
